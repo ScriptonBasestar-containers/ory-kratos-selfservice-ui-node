@@ -5,19 +5,21 @@ REPO_PREFIX := ory-
 .PHONY: docker-dev-build
 docker-dev-build:
 	docker build -f ./Dockerfile-dev -t kratos-ui-node-dev . --platform linux/amd64 --platform linux/arm64
-	docker tag kratos-ui-node-dev ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
 
 docker-dev-deploy:
+	docker tag kratos-ui-node-dev ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
 	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
 
 .PHONY: docker-build
 docker-build:
 	docker build -t kratos-ui-node . --platform linux/amd64 --platform linux/arm64
-	docker tag kratos-ui-node ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
 
 .PHONY: docker-deploy
 docker-deploy:
+	docker tag kratos-ui-node ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
+	docker tag kratos-ui-node ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest
 	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
+	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest
 
 .PHONY: build-sdk
 build-sdk:
