@@ -1,12 +1,15 @@
 rand := $(shell openssl rand -hex 6)
+ORG_NAME := archmagece
+REPO_PREFIX := ory-
 
 .PHONY: docker-dev-build
 docker-dev-build:
-		docker build -f ./Dockerfile-dev -t oryd/kratos-selfservice-ui-node:latest .
+		docker build -f ./Dockerfile-dev -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev .
 
 .PHONY: docker
 docker:
-	docker build -t oryd/kratos-selfservice-ui-node:latest .
+	docker build -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest .
+	docker tag -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd .
 
 .PHONY: build-sdk
 build-sdk:
@@ -34,7 +37,7 @@ publish-sdk: build-sdk
 
 .PHONY: build-sdk-docker
 build-sdk-docker: build-sdk
-	docker build -t oryd/kratos-selfservice-ui-node:latest . --build-arg LINK=true
+	docker build -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest . --build-arg LINK=true
 
 .PHONY: clean-sdk
 clean-sdk:
