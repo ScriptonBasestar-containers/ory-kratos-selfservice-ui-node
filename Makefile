@@ -1,15 +1,23 @@
 rand := $(shell openssl rand -hex 6)
-ORG_NAME := archmagece
+ORG_NAME := scriptonbasestar
 REPO_PREFIX := ory-
 
 .PHONY: docker-dev-build
 docker-dev-build:
-		docker build -f ./Dockerfile-dev -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev .
+	docker build -f ./Dockerfile-dev -t kratos-ui-node-dev . --platform linux/amd64 --platform linux/arm64
+	docker tag kratos-ui-node-dev ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
 
-.PHONY: docker
-docker:
-	docker build -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest .
-	docker tag -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd .
+docker-dev-deploy:
+	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
+
+.PHONY: docker-build
+docker-build:
+	docker build -t kratos-ui-node . --platform linux/amd64 --platform linux/arm64
+	docker tag kratos-ui-node ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
+
+.PHONY: docker-deploy
+docker-deploy:
+	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
 
 .PHONY: build-sdk
 build-sdk:
