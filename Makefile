@@ -1,18 +1,33 @@
 rand := $(shell openssl rand -hex 6)
 ORG_NAME := scriptonbasestar
 REPO_PREFIX := ory-
+# PLATFORM_OPTS := --platform linux/amd64 --platform linux/arm64
+PLATFORM_OPTS := --platform linux/amd64,linux/arm64
+# PLATFORM_OPTS := --platform linux/amd64
+
+.PHONY: docker-builder-setup
+docker-builder-setup:
+	docker buildx create --use --platform=linux/arm64,linux/amd64 --name multi-platform-builder
+	docker buildx inspect --bootstrap
 
 .PHONY: docker-dev-build
 docker-dev-build:
-	docker build -f ./Dockerfile-dev -t kratos-ui-node-dev . --platform linux/amd64 --platform linux/arm64
+	docker buildx build -f ./Dockerfile-dev -t kratos-ui-node-dev . ${PLATFORM_OPTS}
 
 docker-dev-deploy:
 	docker tag kratos-ui-node-dev ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
 	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
 
+docker-dev-run:
+	# docker run -it -p 3000:3000 kratos-ui-node-dev
+	docker compose -f compose-dev.yml up -d 
+
+docker-dev-stop:
+	docker compose -f compose-dev.yml down -v
+
 .PHONY: docker-build
 docker-build:
-	docker build -t kratos-ui-node . --platform linux/amd64 --platform linux/arm64
+	docker buildx build -t kratos-ui-node . ${PLATFORM_OPTS}
 
 .PHONY: docker-deploy
 docker-deploy:
@@ -47,7 +62,7 @@ publish-sdk: build-sdk
 
 .PHONY: build-sdk-docker
 build-sdk-docker: build-sdk
-	docker build -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest . --build-arg LINK=true
+	docker buildx build -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest . --build-arg LINK=true
 
 .PHONY: clean-sdk
 clean-sdk:
