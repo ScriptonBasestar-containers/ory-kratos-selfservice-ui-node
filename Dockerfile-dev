@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 USER nobody
 
 ADD --chown=nobody:nogroup ./package* ./
-RUN npm ci --fetch-timeout=600000
+# RUN npm ci --fetch-timeout=600000
 
 EXPOSE 3000
 ENTRYPOINT ["npm", "run"]
