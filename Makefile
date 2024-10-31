@@ -4,9 +4,11 @@ REPO_PREFIX := ory-
 # PLATFORM_OPTS := --platform linux/amd64 --platform linux/arm64
 PLATFORM_OPTS := --platform linux/amd64,linux/arm64
 # PLATFORM_OPTS := --platform linux/amd64
+## FIXME builx, platform, output... manjaro, mac에서 동작이 다르다. 버전문제인가
 
 .PHONY: docker-builder-setup
 docker-builder-setup:
+	# docker buildx create --use --platform=linux/arm64,linux/amd64 --name multi-platform-builder0
 	docker buildx create --use --platform=linux/arm64,linux/amd64 --name multi-platform-builder
 	docker buildx inspect --bootstrap
 
@@ -27,7 +29,8 @@ docker-dev-stop:
 
 .PHONY: docker-build
 docker-build:
-	docker buildx build -t kratos-ui-node . ${PLATFORM_OPTS}
+	# docker buildx build -o type=docker -t kratos-ui-node . ${PLATFORM_OPTS}
+	docker buildx build -o type=docker -t kratos-ui-node .
 
 .PHONY: docker-push
 docker-push:
