@@ -1,12 +1,43 @@
 rand := $(shell openssl rand -hex 6)
+ORG_NAME := scriptonbasestar
+REPO_PREFIX := ory-
+# PLATFORM_OPTS := --platform linux/amd64 --platform linux/arm64
+PLATFORM_OPTS := --platform linux/amd64,linux/arm64
+# PLATFORM_OPTS := --platform linux/amd64
+## FIXME builx, platform, output... manjaro, mac에서 동작이 다르다. 버전문제인가
+
+.PHONY: docker-builder-setup
+docker-builder-setup:
+	# docker buildx create --use --platform=linux/arm64,linux/amd64 --name multi-platform-builder0
+	docker buildx create --use --platform=linux/arm64,linux/amd64 --name multi-platform-builder
+	docker buildx inspect --bootstrap
 
 .PHONY: docker-dev-build
 docker-dev-build:
-		docker build -f ./Dockerfile-dev -t oryd/kratos-selfservice-ui-node:latest .
+	docker buildx build -f ./Dockerfile-dev -t kratos-ui-node-dev . ${PLATFORM_OPTS}
 
-.PHONY: docker
-docker:
-	docker build -t oryd/kratos-selfservice-ui-node:latest .
+docker-dev-push:
+	docker tag kratos-ui-node-dev ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
+	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:dev
+
+docker-dev-run:
+	# docker run -it -p 3000:3000 kratos-ui-node-dev
+	docker compose -f compose-dev.yml up -d 
+
+docker-dev-stop:
+	docker compose -f compose-dev.yml down -v
+
+.PHONY: docker-build
+docker-build:
+	# docker buildx build -o type=docker -t kratos-ui-node . ${PLATFORM_OPTS}
+	docker buildx build -o type=docker -t kratos-ui-node .
+
+.PHONY: docker-push
+docker-push:
+	docker tag kratos-ui-node ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
+	docker tag kratos-ui-node ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest
+	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:prd
+	docker push ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest
 
 .PHONY: build-sdk
 build-sdk:
@@ -34,7 +65,7 @@ publish-sdk: build-sdk
 
 .PHONY: build-sdk-docker
 build-sdk-docker: build-sdk
-	docker build -t oryd/kratos-selfservice-ui-node:latest . --build-arg LINK=true
+	docker buildx build -t ${ORG_NAME}/${REPO_PREFIX}kratos-selfservice-ui-node:latest . --build-arg LINK=true
 
 .PHONY: clean-sdk
 clean-sdk:
